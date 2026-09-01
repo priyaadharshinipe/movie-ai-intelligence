@@ -1,0 +1,8 @@
+﻿movie_embeddings.npy
+movie_faiss.index
+movie_rating_model.pkl
+movie_data.pkl
+movie_documents.pkl
+__pycache__/
+.env
+*.key

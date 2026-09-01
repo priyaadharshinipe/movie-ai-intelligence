@@ -1,0 +1,11 @@
+streamlit
+streamlit-mic-recorder
+pandas
+numpy
+faiss-cpu
+joblib
+scikit-learn
+sentence-transformers
+google-genai
+requests
+Pillow
