@@ -12,13 +12,21 @@ import joblib
 
 from sentence_transformers import SentenceTransformer
 from google import genai
+from pathlib import Path
+import os
+
+BASE_DIR = Path(__file__).resolve().parent
 
 def get_movie_poster(title):
 
     import requests
     import os
 
-    api_key = os.environ.get("TMDB_API_KEY")
+    api_key = (
+        st.secrets.get("TMDB_API_KEY", None)
+        if hasattr(st, "secrets")
+        else None
+    ) or os.getenv("TMDB_API_KEY")
 
     if not api_key:
         return None
@@ -217,30 +225,47 @@ div[data-testid="stImage"] img {
 # LOAD DATA
 # ============================================================
 
-@st.cache_resource
+@st.cache_resource(show_spinner="Loading Movie AI models...")
 def load_project():
+    required_files = [
+        "movie_data.pkl",
+        "movie_rating_model.pkl",
+        "feature_columns.pkl",
+        "movie_faiss.index",
+        "movie_documents.pkl",
+    ]
+
+    missing_files = [
+        file_name
+        for file_name in required_files
+        if not (BASE_DIR / file_name).exists()
+    ]
+
+    if missing_files:
+        raise FileNotFoundError(
+            "Missing project files: " + ", ".join(missing_files)
+        )
 
     movie_data = pd.read_pickle(
-        "/content/movie_data.pkl"
+        BASE_DIR / "movie_data.pkl"
     )
 
     model = joblib.load(
-        "/content/movie_rating_model.pkl"
+        BASE_DIR / "movie_rating_model.pkl"
     )
 
     feature_columns = joblib.load(
-        "/content/feature_columns.pkl"
+        BASE_DIR / "feature_columns.pkl"
     )
 
     index = faiss.read_index(
-        "/content/movie_faiss.index"
+        str(BASE_DIR / "movie_faiss.index")
     )
 
     with open(
-        "/content/movie_documents.pkl",
+        BASE_DIR / "movie_documents.pkl",
         "rb"
     ) as f:
-
         documents = pickle.load(f)
 
     embedding_model = SentenceTransformer(
@@ -276,7 +301,7 @@ def load_gemini():
 
     api_key = st.secrets.get(
         "GEMINI_API_KEY",
-        ""
+        os.getenv("GEMINI_API_KEY", "")
     )
 
     if not api_key:
