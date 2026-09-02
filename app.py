@@ -1,4 +1,3 @@
-
 import streamlit as st
 import base64
 import io
@@ -15,12 +14,17 @@ from google import genai
 from pathlib import Path
 import os
 
+
 BASE_DIR = Path(__file__).resolve().parent
+
+
+# ============================================================
+# TMDB MOVIE POSTER
+# ============================================================
 
 def get_movie_poster(title):
 
     import requests
-    import os
 
     api_key = (
         st.secrets.get("TMDB_API_KEY", None)
@@ -58,9 +62,7 @@ def get_movie_poster(title):
         if not results:
             return None
 
-        poster_path = results[0].get(
-            "poster_path"
-        )
+        poster_path = results[0].get("poster_path")
 
         if not poster_path:
             return None
@@ -74,14 +76,13 @@ def get_movie_poster(title):
         return None
 
 
-
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
 
-# Selected movie from recommendation cards
 if "selected_recommendation_movie" not in st.session_state:
     st.session_state.selected_recommendation_movie = None
+
 
 st.set_page_config(
     page_title="Movie AI Intelligence",
@@ -96,6 +97,10 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+
+/* ==========================================================
+   MAIN HEADER
+   ========================================================== */
 
 .main-title {
     font-size: 42px;
@@ -112,6 +117,25 @@ st.markdown("""
     margin-bottom: 30px;
 }
 
+
+/* ==========================================================
+   DASHBOARD KPI CARDS
+   ========================================================== */
+
+.metric-card {
+    border: 1px solid rgba(128,128,128,0.22);
+    border-radius: 16px;
+    padding: 18px;
+    background: rgba(128,128,128,0.06);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    min-height: 145px;
+}
+
+
+/* ==========================================================
+   STREAMLIT METRICS
+   ========================================================== */
+
 div[data-testid="stMetric"] {
     border: 1px solid rgba(128,128,128,0.22);
     border-radius: 16px;
@@ -127,6 +151,11 @@ div[data-testid="stMetric"] label {
 div[data-testid="stMetricValue"] {
     font-weight: 800;
 }
+
+
+/* ==========================================================
+   MOVIE CARD
+   ========================================================== */
 
 .movie-card {
     border: 1px solid rgba(128,128,128,0.20);
@@ -180,6 +209,11 @@ div[data-testid="stMetricValue"] {
     font-weight: 750;
 }
 
+
+/* ==========================================================
+   CHAT MOVIE CARD
+   ========================================================== */
+
 .chat-movie-card {
     border: 1px solid rgba(128,128,128,0.20);
     border-radius: 18px;
@@ -197,6 +231,11 @@ div[data-testid="stMetricValue"] {
     font-size: 14px;
 }
 
+
+/* ==========================================================
+   SECTION HEADER
+   ========================================================== */
+
 .section-header {
     font-size: 27px;
     font-weight: 800;
@@ -204,21 +243,115 @@ div[data-testid="stMetricValue"] {
     margin-bottom: 15px;
 }
 
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
 .stButton > button {
     border-radius: 10px;
     font-weight: 650;
     width: 100%;
 }
 
+
+/* ==========================================================
+   IMAGES
+   ========================================================== */
+
 div[data-testid="stImage"] img {
     border-radius: 14px;
 }
 
+
+/* ==========================================================
+   MOVIE INTELLIGENCE
+   ========================================================== */
+
+.movie-intel-card {
+    border: 1px solid rgba(128,128,128,0.20);
+    border-radius: 18px;
+    padding: 20px;
+    margin: 15px 0 25px 0;
+    background: rgba(128,128,128,0.05);
+    box-shadow: 0 5px 18px rgba(0,0,0,0.07);
+}
+
+.movie-intel-title {
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.movie-intel-genres {
+    font-size: 15px;
+    opacity: 0.75;
+    margin-bottom: 20px;
+}
+
+.movie-intel-description {
+    border: 1px solid rgba(128,128,128,0.20);
+    border-radius: 15px;
+    padding: 18px;
+    margin-top: 20px;
+    background: rgba(128,128,128,0.06);
+}
+
+
+/* ==========================================================
+   RECOMMENDATION CARD ALIGNMENT
+   ========================================================== */
+
+/*
+   Keeps recommendation information areas visually consistent
+   even when movie titles or genre lists have different lengths.
+*/
+
+.recommendation-info {
+    min-height: 330px;
+}
+
+.recommendation-title {
+    min-height: 65px;
+}
+
+.recommendation-genres {
+    min-height: 50px;
+}
+
+.recommendation-message {
+    min-height: 65px;
+}
+
+
+/* ==========================================================
+   RECOMMENDATION POSTER
+   ========================================================== */
+
+.recommendation-poster {
+    width: 100%;
+    border-radius: 14px;
+}
+
+
+/* ==========================================================
+   MOBILE / SMALL SCREEN
+   ========================================================== */
+
+@media (max-width: 900px) {
+
+    .main-title {
+        font-size: 32px;
+    }
+
+    .subtitle {
+        font-size: 15px;
+    }
+
+}
+
 </style>
 """, unsafe_allow_html=True)
-
-
-
 
 
 # ============================================================
@@ -227,6 +360,7 @@ div[data-testid="stImage"] img {
 
 @st.cache_resource(show_spinner="Loading Movie AI models...")
 def load_project():
+
     required_files = [
         "movie_data.pkl",
         "movie_rating_model.pkl",
@@ -242,8 +376,10 @@ def load_project():
     ]
 
     if missing_files:
+
         raise FileNotFoundError(
-            "Missing project files: " + ", ".join(missing_files)
+            "Missing project files: "
+            + ", ".join(missing_files)
         )
 
     movie_data = pd.read_pickle(
@@ -266,6 +402,7 @@ def load_project():
         BASE_DIR / "movie_documents.pkl",
         "rb"
     ) as f:
+
         documents = pickle.load(f)
 
     embedding_model = SentenceTransformer(
@@ -305,7 +442,6 @@ def load_gemini():
     )
 
     if not api_key:
-
         return None
 
     return genai.Client(
@@ -321,12 +457,9 @@ client = load_gemini()
 # ============================================================
 
 if "previous_interaction_id" not in st.session_state:
-
     st.session_state.previous_interaction_id = None
 
-
 if "last_movie_title" not in st.session_state:
-
     st.session_state.last_movie_title = None
 
 
@@ -361,6 +494,9 @@ def retrieve_movies(
         indices[0]
     ):
 
+        if idx < 0 or idx >= len(documents):
+            continue
+
         results.append({
             "score": float(score),
             "document": documents[idx]
@@ -375,15 +511,12 @@ def retrieve_movies(
 
 def movie_chatbot(user_question):
 
-    # ========================================================
-    # INITIALIZE MEMORY
-    # ========================================================
-
     if "last_movie_title" not in st.session_state:
         st.session_state.last_movie_title = ""
 
     if "previous_interaction_id" not in st.session_state:
         st.session_state.previous_interaction_id = None
+
 
     # ========================================================
     # CLEAN QUESTION
@@ -394,7 +527,11 @@ def movie_chatbot(user_question):
     ).strip()
 
     if not user_question:
-        return "Please ask me something about a movie."
+
+        return (
+            "Please ask me something about a movie."
+        )
+
 
     # ========================================================
     # MOVIE MEMORY
@@ -404,11 +541,13 @@ def movie_chatbot(user_question):
         st.session_state.last_movie_title
     )
 
+
     # ========================================================
     # FOLLOW-UP DETECTION
     # ========================================================
 
     follow_up_words = [
+
         "it",
         "this",
         "this movie",
@@ -418,13 +557,11 @@ def movie_chatbot(user_question):
         "it's",
         "the movie",
 
-        # Rating questions
         "its rating",
         "what is its rating",
         "how good is it",
         "how is its rating",
 
-        # Genre / story questions
         "its genre",
         "its genres",
         "what are its genres",
@@ -432,7 +569,6 @@ def movie_chatbot(user_question):
         "its plot",
         "tell me more",
 
-        # Recommendation questions
         "would you recommend",
         "would you recommend it",
         "recommend it",
@@ -441,7 +577,6 @@ def movie_chatbot(user_question):
         "movies like it",
         "similar to it",
 
-        # Information questions
         "who directed it",
         "who acted in it",
         "how many ratings",
@@ -460,6 +595,7 @@ def movie_chatbot(user_question):
         for word in follow_up_words
     )
 
+
     # ========================================================
     # SEARCH QUERY
     # ========================================================
@@ -475,6 +611,7 @@ def movie_chatbot(user_question):
 
         search_query = user_question
 
+
     # ========================================================
     # RAG
     # ========================================================
@@ -489,8 +626,9 @@ def movie_chatbot(user_question):
         for item in retrieved
     )
 
+
     # ========================================================
-    # UPDATE MOVIE MEMORY FROM RAG
+    # UPDATE MOVIE MEMORY
     # ========================================================
 
     if retrieved:
@@ -522,6 +660,7 @@ def movie_chatbot(user_question):
                         last_movie = detected_movie
 
                         break
+
 
     # ========================================================
     # PROMPT
@@ -585,6 +724,7 @@ IMPORTANT RULES:
 12. Keep normal answers concise but useful.
 """
 
+
     # ========================================================
     # GEMINI
     # ========================================================
@@ -624,6 +764,7 @@ IMPORTANT RULES:
 
         return interaction.output_text
 
+
     # ========================================================
     # LOCAL RAG FALLBACK
     # ========================================================
@@ -653,10 +794,6 @@ IMPORTANT RULES:
             fallback.append(
                 best_doc
             )
-
-            # ------------------------------------------------
-            # FOLLOW-UP FRIENDLY RESPONSE
-            # ------------------------------------------------
 
             if any(
                 word in question_lower
@@ -720,7 +857,9 @@ IMPORTANT RULES:
 # ============================================================
 
 st.markdown(
-    '<div class="main-title">🎬 Movie AI Intelligence System</div>',
+    '<div class="main-title">'
+    '🎬 Movie AI Intelligence System'
+    '</div>',
     unsafe_allow_html=True
 )
 
@@ -747,7 +886,10 @@ pages = [
 ]
 
 if "page_navigation" not in st.session_state:
-    st.session_state.page_navigation = "📊 Dashboard"
+
+    st.session_state.page_navigation = (
+        "📊 Dashboard"
+    )
 
 page = st.sidebar.radio(
     "Select Page",
@@ -770,19 +912,22 @@ if page == "📊 Dashboard":
 
 
     # ========================================================
-    # PROFESSIONAL KPI CARDS
+    # KPI CARDS
     # ========================================================
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
+
         st.markdown(
             f"""
             <div class="metric-card">
                 <div style="font-size:30px;">🎬</div>
+
                 <div style="font-size:14px; opacity:0.7;">
                     Total Movies
                 </div>
+
                 <div style="font-size:28px; font-weight:800;">
                     {len(movie_data):,}
                 </div>
@@ -792,13 +937,16 @@ if page == "📊 Dashboard":
         )
 
     with col2:
+
         st.markdown(
             f"""
             <div class="metric-card">
                 <div style="font-size:30px;">⭐</div>
+
                 <div style="font-size:14px; opacity:0.7;">
                     Average Rating
                 </div>
+
                 <div style="font-size:28px; font-weight:800;">
                     {movie_data['average_rating'].mean():.2f}
                 </div>
@@ -808,13 +956,16 @@ if page == "📊 Dashboard":
         )
 
     with col3:
+
         st.markdown(
             f"""
             <div class="metric-card">
                 <div style="font-size:30px;">👥</div>
+
                 <div style="font-size:14px; opacity:0.7;">
                     Total Ratings
                 </div>
+
                 <div style="font-size:28px; font-weight:800;">
                     {int(movie_data['rating_count'].sum()):,}
                 </div>
@@ -824,13 +975,16 @@ if page == "📊 Dashboard":
         )
 
     with col4:
+
         st.markdown(
             f"""
             <div class="metric-card">
                 <div style="font-size:30px;">🤖</div>
+
                 <div style="font-size:14px; opacity:0.7;">
                     Avg Predicted
                 </div>
+
                 <div style="font-size:28px; font-weight:800;">
                     {movie_data['predicted_rating'].mean():.2f}
                 </div>
@@ -839,8 +993,16 @@ if page == "📊 Dashboard":
             unsafe_allow_html=True
         )
 
-    st.markdown("<br>", unsafe_allow_html=True)
 
+    st.markdown(
+        "<br>",
+        unsafe_allow_html=True
+    )
+
+
+    # ========================================================
+    # RATING DISTRIBUTION
+    # ========================================================
 
     st.subheader(
         "⭐ Rating Distribution"
@@ -857,6 +1019,10 @@ if page == "📊 Dashboard":
         rating_distribution
     )
 
+
+    # ========================================================
+    # GENRE DISTRIBUTION
+    # ========================================================
 
     st.subheader(
         "🎭 Genre Distribution"
@@ -877,7 +1043,6 @@ if page == "📊 Dashboard":
                     ) + 1
                 )
 
-
     genre_df = (
         pd.DataFrame(
             list(
@@ -895,7 +1060,6 @@ if page == "📊 Dashboard":
         .head(15)
     )
 
-
     st.bar_chart(
         genre_df.set_index("Genre")
     )
@@ -905,49 +1069,13 @@ if page == "📊 Dashboard":
     # TOP RATED MOVIES
     # ========================================================
 
-    st.subheader("🏆 Top Rated Movies")
-
-    top_movies = (
-        movie_data[
-            movie_data["rating_count"] >= 100
-        ]
-        .sort_values(
-            "average_rating",
-            ascending=False
-        )
-        [
-            [
-                "title",
-                "genres",
-                "average_rating",
-                "rating_count",
-                "predicted_rating"
-            ]
-        ]
-        .head(10)
-        .copy()
-    )
-
-    top_movies = top_movies.rename(
-        columns={
-            "title": "🎬 Movie",
-            "genres": "🎭 Genres",
-            "average_rating": "⭐ Actual Rating",
-            "rating_count": "👥 Ratings",
-            "predicted_rating": "🤖 Predicted"
-        }
-    )
-
-    # ========================================================
-    # TOP RATED MOVIE CARDS
-    # ========================================================
-
     st.markdown(
-        '<div class="section-header">🍿 Top Rated Movies</div>',
+        '<div class="section-header">'
+        '🍿 Top Rated Movies'
+        '</div>',
         unsafe_allow_html=True
     )
 
-    # Create Top Rated Movies directly from movie_data
     top_movies = (
         movie_data[
             movie_data["rating_count"] >= 100
@@ -1026,7 +1154,9 @@ if page == "📊 Dashboard":
     # MOST POPULAR MOVIES
     # ========================================================
 
-    st.subheader("🔥 Most Popular Movies")
+    st.subheader(
+        "🔥 Most Popular Movies"
+    )
 
     popular_movies = (
         movie_data
@@ -1070,7 +1200,6 @@ if page == "📊 Dashboard":
                 movie_title
             )
 
-            # Poster
             if poster_url:
 
                 st.image(
@@ -1078,17 +1207,14 @@ if page == "📊 Dashboard":
                     use_container_width=True
                 )
 
-            # Title
             st.markdown(
                 f"**#{i + 1} 🎬 {movie_title}**"
             )
 
-            # Genres
             st.caption(
                 f"🎭 {movie_genres}"
             )
 
-            # Rating
             col_a, col_b = st.columns(2)
 
             with col_a:
@@ -1117,7 +1243,9 @@ if page == "📊 Dashboard":
     # RATING VS POPULARITY
     # ========================================================
 
-    st.subheader("📈 Rating vs Popularity")
+    st.subheader(
+        "📈 Rating vs Popularity"
+    )
 
     chart_data = (
         movie_data[
@@ -1156,7 +1284,9 @@ if page == "📊 Dashboard":
 
 elif page == "🔎 Movie Intelligence":
 
-    st.header("🔎 Specific Movie Intelligence")
+    st.header(
+        "🔎 Specific Movie Intelligence"
+    )
 
     selected_from_card = st.session_state.get(
         "selected_recommendation_movie",
@@ -1164,26 +1294,25 @@ elif page == "🔎 Movie Intelligence":
     )
 
     if selected_from_card:
+
         movie_name = selected_from_card
 
         st.info(
-            f"🎬 Selected from Recommendations: **{movie_name}**"
+            f"🎬 Selected from Recommendations: "
+            f"**{movie_name}**"
         )
 
-        # Clear the selection so normal search works
         st.session_state.selected_recommendation_movie = ""
 
     else:
+
         movie_name = st.text_input(
             "🔎 Enter movie name",
             placeholder="Example: Toy Story"
         )
 
-    if movie_name:
 
-        # ----------------------------------------------------
-        # FIND MOVIE
-        # ----------------------------------------------------
+    if movie_name:
 
         result = movie_data[
             movie_data["title"]
@@ -1193,6 +1322,7 @@ elif page == "🔎 Movie Intelligence":
         ]
 
         if result.empty:
+
             result = movie_data[
                 movie_data["title"]
                 .astype(str)
@@ -1204,6 +1334,7 @@ elif page == "🔎 Movie Intelligence":
                 )
             ]
 
+
         if result.empty:
 
             st.error(
@@ -1214,8 +1345,13 @@ elif page == "🔎 Movie Intelligence":
 
             movie = result.iloc[0]
 
-            title = str(movie["title"])
-            genres = str(movie["genres"])
+            title = str(
+                movie["title"]
+            )
+
+            genres = str(
+                movie["genres"]
+            )
 
             actual_rating = float(
                 movie["average_rating"]
@@ -1233,11 +1369,15 @@ elif page == "🔎 Movie Intelligence":
                 movie["rating_difference"]
             )
 
+
             # ------------------------------------------------
             # POSTER
             # ------------------------------------------------
 
-            poster_url = get_movie_poster(title)
+            poster_url = get_movie_poster(
+                title
+            )
+
 
             # ------------------------------------------------
             # PROFESSIONAL CARD
@@ -1268,6 +1408,7 @@ elif page == "🔎 Movie Intelligence":
                         unsafe_allow_html=True
                     )
 
+
             with info_col:
 
                 st.markdown(
@@ -1291,12 +1432,14 @@ elif page == "🔎 Movie Intelligence":
                 col1, col2 = st.columns(2)
 
                 with col1:
+
                     st.metric(
                         "⭐ Actual Rating",
                         f"{actual_rating:.2f}/5"
                     )
 
                 with col2:
+
                     st.metric(
                         "🤖 Predicted Rating",
                         f"{predicted_rating:.2f}/5"
@@ -1305,27 +1448,33 @@ elif page == "🔎 Movie Intelligence":
                 col3, col4 = st.columns(2)
 
                 with col3:
+
                     st.metric(
                         "👥 Rating Count",
                         f"{rating_count:,}"
                     )
 
                 with col4:
+
                     st.metric(
                         "📊 Difference",
                         f"{rating_difference:+.2f}"
                     )
+
 
             st.markdown(
                 "</div>",
                 unsafe_allow_html=True
             )
 
+
             # ------------------------------------------------
             # GENRES
             # ------------------------------------------------
 
-            st.subheader("🎭 Movie Genres")
+            st.subheader(
+                "🎭 Movie Genres"
+            )
 
             genre_list = [
                 g.strip()
@@ -1339,7 +1488,9 @@ elif page == "🔎 Movie Intelligence":
                 else 1
             )
 
-            for i, genre in enumerate(genre_list):
+            for i, genre in enumerate(
+                genre_list
+            ):
 
                 with genre_cols[
                     i % len(genre_cols)
@@ -1349,13 +1500,18 @@ elif page == "🔎 Movie Intelligence":
                         f"🎬 {genre}"
                     )
 
+
             # ------------------------------------------------
             # RATING ANALYSIS
             # ------------------------------------------------
 
-            st.subheader("📊 Rating Analysis")
+            st.subheader(
+                "📊 Rating Analysis"
+            )
 
-            analysis_col1, analysis_col2 = st.columns(2)
+            analysis_col1, analysis_col2 = (
+                st.columns(2)
+            )
 
             with analysis_col1:
 
@@ -1371,6 +1527,7 @@ elif page == "🔎 Movie Intelligence":
                     f"{predicted_rating:.2f}",
                     delta=f"{rating_difference:+.2f}"
                 )
+
 
             # ------------------------------------------------
             # INSIGHT
@@ -1397,17 +1554,23 @@ elif page == "🔎 Movie Intelligence":
                     "current dataset average."
                 )
 
+
             st.markdown(
                 f"""
                 <div class="movie-intel-description">
                     <b>💡 AI Rating Insight</b><br><br>
-                    {insight}<br><br>
+
+                    {insight}
+
+                    <br><br>
+
                     This movie has received
                     <b>{rating_count:,}</b> ratings.
                 </div>
                 """,
                 unsafe_allow_html=True
             )
+
 
             # ------------------------------------------------
             # BACK BUTTON
@@ -1437,7 +1600,6 @@ elif page == "⭐ Rating Predictions":
         "⭐ Rating Prediction for All Movies"
     )
 
-
     st.write(
         "The ML model has generated a predicted "
         "rating for every movie."
@@ -1445,7 +1607,6 @@ elif page == "⭐ Rating Predictions":
 
 
     col1, col2 = st.columns(2)
-
 
     with col1:
 
@@ -1456,7 +1617,6 @@ elif page == "⭐ Rating Predictions":
             3.5,
             0.1
         )
-
 
     with col2:
 
@@ -1520,17 +1680,21 @@ elif page == "⭐ Rating Predictions":
 
 elif page == "🎯 Recommendations":
 
-    st.header("🎯 Movie Recommendations")
+    st.header(
+        "🎯 Movie Recommendations"
+    )
 
     st.write(
         "Find movies similar to a movie you already like "
         "using genre similarity, ratings and ML predictions."
     )
 
+
     movie_name = st.text_input(
         "🔎 Enter a movie you like",
         placeholder="Example: Forrest Gump"
     )
+
 
     number_of_recommendations = st.slider(
         "🍿 Number of recommendations",
@@ -1538,6 +1702,7 @@ elif page == "🎯 Recommendations":
         max_value=20,
         value=10
     )
+
 
     if movie_name:
 
@@ -1550,53 +1715,69 @@ elif page == "🎯 Recommendations":
             )
         ]
 
+
         if result.empty:
 
             st.error(
-                "❌ Movie not found. Try another movie name."
+                "❌ Movie not found. "
+                "Try another movie name."
             )
+
 
         else:
 
             selected = result.iloc[0]
 
             st.success(
-                f"🎬 Selected Movie: {selected['title']}"
+                f"🎬 Selected Movie: "
+                f"{selected['title']}"
             )
+
 
             col1, col2, col3 = st.columns(3)
 
             with col1:
+
                 st.metric(
                     "⭐ Actual Rating",
                     f"{selected['average_rating']:.2f}"
                 )
 
             with col2:
+
                 st.metric(
                     "🤖 Predicted Rating",
                     f"{selected['predicted_rating']:.2f}"
                 )
 
             with col3:
+
                 st.metric(
                     "👥 Rating Count",
                     f"{int(selected['rating_count']):,}"
                 )
 
+
             st.write(
                 f"🎭 **Genres:** {selected['genres']}"
             )
 
+
             st.divider()
 
+
             selected_genres = set(
-                str(selected["genres"]).split("|")
+                str(
+                    selected["genres"]
+                ).split("|")
             )
 
+
             candidates = movie_data[
-                movie_data["title"] != selected["title"]
+                movie_data["title"]
+                != selected["title"]
             ].copy()
+
 
             def genre_similarity(genres):
 
@@ -1605,22 +1786,31 @@ elif page == "🎯 Recommendations":
                 )
 
                 return len(
-                    selected_genres & movie_genres
+                    selected_genres
+                    &
+                    movie_genres
                 )
+
 
             candidates["genre_match"] = (
                 candidates["genres"]
                 .apply(genre_similarity)
             )
 
+
             candidates["recommendation_score"] = (
+
                 candidates["genre_match"] * 3
+
                 + candidates["average_rating"] * 2
+
                 + candidates["predicted_rating"] * 3
+
                 + np.log1p(
                     candidates["rating_count"]
                 ) * 0.1
             )
+
 
             recommendations = (
                 candidates[
@@ -1630,18 +1820,23 @@ elif page == "🎯 Recommendations":
                     "recommendation_score",
                     ascending=False
                 )
-                .head(number_of_recommendations)
+                .head(
+                    number_of_recommendations
+                )
             )
+
 
             st.subheader(
                 "🍿 Recommended Movies"
             )
+
 
             if recommendations.empty:
 
                 st.warning(
                     "No similar movies were found."
                 )
+
 
             else:
 
@@ -1654,27 +1849,41 @@ elif page == "🎯 Recommendations":
                         movie["title"]
                     )
 
+
                     common_genres = (
                         selected_genres
                         &
                         set(
-                            str(movie["genres"]).split("|")
+                            str(
+                                movie["genres"]
+                            ).split("|")
                         )
                     )
+
 
                     genre_text = ", ".join(
                         sorted(common_genres)
                     )
 
-                    # ----------------------------------------
-                    # MOVIE CARD
-                    # ----------------------------------------
 
-                    with st.container(border=True):
+                    # ==================================================
+                    # RECOMMENDATION CARD
+                    # ==================================================
+
+                    with st.container(
+                        border=True
+                    ):
 
                         poster_col, info_col = (
-                            st.columns([1, 3])
+                            st.columns(
+                                [1, 3]
+                            )
                         )
+
+
+                        # ==================================================
+                        # POSTER
+                        # ==================================================
 
                         with poster_col:
 
@@ -1704,15 +1913,46 @@ elif page == "🎯 Recommendations":
                                     unsafe_allow_html=True
                                 )
 
+
+                        # ==================================================
+                        # MOVIE INFORMATION
+                        # ==================================================
+
                         with info_col:
 
                             st.markdown(
-                                f"## #{rank} {movie['title']}"
+                                '<div class="recommendation-info">',
+                                unsafe_allow_html=True
                             )
 
-                            st.caption(
-                                f"🎭 {movie['genres']}"
+
+                            # Movie title
+                            st.markdown(
+                                f"""
+                                <div class="recommendation-title">
+                                    <h2>
+                                        #{rank} {movie['title']}
+                                    </h2>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
                             )
+
+
+                            # Genres
+                            st.markdown(
+                                f"""
+                                <div class="recommendation-genres">
+                                    🎭 {movie['genres']}
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+
+
+                            # ==================================================
+                            # RATINGS
+                            # ==================================================
 
                             col1, col2 = st.columns(2)
 
@@ -1730,6 +1970,7 @@ elif page == "🎯 Recommendations":
                                     f"{movie['predicted_rating']:.2f}"
                                 )
 
+
                             col3, col4 = st.columns(2)
 
                             with col3:
@@ -1746,15 +1987,35 @@ elif page == "🎯 Recommendations":
                                     f"{movie['recommendation_score']:.2f}"
                                 )
 
-                            st.info(
-                                f"💡 Shares genres with "
-                                f"**{selected['title']}**: "
-                                f"{genre_text}"
+
+                            # ==================================================
+                            # COMMON GENRES
+                            # ==================================================
+
+                            st.markdown(
+                                f"""
+                                <div class="recommendation-message">
+                                    💡 Shares genres with
+                                    <b>{selected['title']}</b>:
+                                    {genre_text}
+                                </div>
+                                """,
+                                unsafe_allow_html=True
                             )
+
+
+                            # ==================================================
+                            # VIEW MOVIE BUTTON
+                            # ==================================================
 
                             if st.button(
                                 "🎬 View Movie",
-                                key=f"view_movie_{rank}_{movie['movieId'] if 'movieId' in movie else rank}"
+                                key=(
+                                    f"view_movie_"
+                                    f"{rank}_"
+                                    f"{movie['movieId'] if 'movieId' in movie else rank}"
+                                ),
+                                use_container_width=True
                             ):
 
                                 st.session_state.selected_recommendation_movie = (
@@ -1767,9 +2028,21 @@ elif page == "🎯 Recommendations":
 
                                 st.rerun()
 
+
+                            st.markdown(
+                                "</div>",
+                                unsafe_allow_html=True
+                            )
+
+
+# ============================================================
+# RECOMMENDATION FUNCTION
 # ============================================================
 
-def get_movie_recommendations(movie_name, n=5):
+def get_movie_recommendations(
+    movie_name,
+    n=5
+):
 
     result = movie_data[
         movie_data["title"].str.contains(
@@ -1780,18 +2053,27 @@ def get_movie_recommendations(movie_name, n=5):
         )
     ]
 
+
     if result.empty:
+
         return None, []
+
 
     selected = result.iloc[0]
 
+
     selected_genres = set(
-        str(selected["genres"]).split("|")
+        str(
+            selected["genres"]
+        ).split("|")
     )
 
+
     candidates = movie_data[
-        movie_data["title"] != selected["title"]
+        movie_data["title"]
+        != selected["title"]
     ].copy()
+
 
     def genre_similarity(genres):
 
@@ -1800,23 +2082,29 @@ def get_movie_recommendations(movie_name, n=5):
         )
 
         return len(
-            selected_genres & movie_genres
+            selected_genres
+            &
+            movie_genres
         )
+
 
     candidates["genre_match"] = (
         candidates["genres"]
         .apply(genre_similarity)
     )
 
+
     max_rating = max(
         candidates["average_rating"].max(),
         1
     )
 
+
     max_predicted = max(
         candidates["predicted_rating"].max(),
         1
     )
+
 
     max_count = max(
         np.log1p(
@@ -1825,27 +2113,35 @@ def get_movie_recommendations(movie_name, n=5):
         1
     )
 
+
     candidates["recommendation_score"] = (
 
         candidates["genre_match"] * 3
 
-        + (
+        +
+
+        (
             candidates["average_rating"]
             / max_rating
         ) * 2
 
-        + (
+        +
+
+        (
             candidates["predicted_rating"]
             / max_predicted
         ) * 3
 
-        + (
+        +
+
+        (
             np.log1p(
                 candidates["rating_count"]
             )
             / max_count
         )
     )
+
 
     recommendations = (
         candidates[
@@ -1858,13 +2154,9 @@ def get_movie_recommendations(movie_name, n=5):
         .head(n)
     )
 
+
     return selected, recommendations
 
-
-
-# ============================================================
-# TMDB MOVIE POSTER
-# ============================================================
 
 # ============================================================
 # GEMINI 3.1 VOICE OUTPUT
@@ -1875,6 +2167,7 @@ def generate_voice_response(text):
     if client is None:
 
         return None
+
 
     try:
 
@@ -1904,25 +2197,24 @@ Answer in a conversational way.
             }
         )
 
-        audio_data = interaction.output_audio.data
 
-        # ----------------------------------------------------
-        # Decode Gemini audio
-        # ----------------------------------------------------
+        audio_data = (
+            interaction.output_audio.data
+        )
 
-        if isinstance(audio_data, str):
+
+        if isinstance(
+            audio_data,
+            str
+        ):
 
             audio_data = base64.b64decode(
                 audio_data
             )
 
 
-        # ----------------------------------------------------
-        # Create WAV file
-        # Gemini TTS audio is PCM 24 kHz
-        # ----------------------------------------------------
-
         wav_buffer = io.BytesIO()
+
 
         with wave.open(
             wav_buffer,
@@ -1968,20 +2260,22 @@ if page == "🤖 AI Chatbot":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # CHAT MEMORY
-    # --------------------------------------------------------
+    # ========================================================
 
     if "chat_history" not in st.session_state:
 
         st.session_state.chat_history = []
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # DISPLAY CHAT HISTORY
-    # --------------------------------------------------------
+    # ========================================================
 
-    for message in st.session_state.chat_history:
+    for message in (
+        st.session_state.chat_history
+    ):
 
         with st.chat_message(
             message["role"]
@@ -1992,16 +2286,17 @@ if page == "🤖 AI Chatbot":
             )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # VOICE INPUT
-    # --------------------------------------------------------
+    # ========================================================
 
     st.markdown(
         "### 🎙️ Voice Assistant"
     )
 
     st.caption(
-        "Click the microphone and speak your movie question."
+        "Click the microphone and speak "
+        "your movie question."
     )
 
 
@@ -2021,9 +2316,9 @@ if page == "🤖 AI Chatbot":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # TEXT INPUT
-    # --------------------------------------------------------
+    # ========================================================
 
     if voice_text:
 
@@ -2040,11 +2335,12 @@ if page == "🤖 AI Chatbot":
         )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # PROCESS QUESTION
-    # --------------------------------------------------------
+    # ========================================================
 
     if question:
+
 
         # ----------------------------------------------------
         # USER MESSAGE
@@ -2086,14 +2382,17 @@ if page == "🤖 AI Chatbot":
                 )
 
 
-            # ------------------------------------------------
+            # ==================================================
             # CURRENT MOVIE CARD
-            # ------------------------------------------------
+            # ==================================================
 
-            current_movie = st.session_state.get(
-                "last_movie_title",
-                ""
+            current_movie = (
+                st.session_state.get(
+                    "last_movie_title",
+                    ""
+                )
             )
+
 
             if current_movie:
 
@@ -2101,8 +2400,12 @@ if page == "🤖 AI Chatbot":
                     movie_data["title"]
                     .astype(str)
                     .str.strip()
-                    == str(current_movie).strip()
+                    ==
+                    str(
+                        current_movie
+                    ).strip()
                 ]
+
 
                 if movie_result.empty:
 
@@ -2117,26 +2420,38 @@ if page == "🤖 AI Chatbot":
                         )
                     ]
 
+
                 if not movie_result.empty:
 
-                    chat_movie = movie_result.iloc[0]
-
-                    poster_url = get_movie_poster(
-                        chat_movie["title"]
+                    chat_movie = (
+                        movie_result.iloc[0]
                     )
+
+
+                    poster_url = (
+                        get_movie_poster(
+                            chat_movie["title"]
+                        )
+                    )
+
 
                     st.markdown(
                         f"""
-<div class="chat-memory">
-🧠 <b>Current Movie:</b> {chat_movie["title"]}
-</div>
-""",
+                        <div class="chat-memory">
+                            🧠 <b>Current Movie:</b>
+                            {chat_movie["title"]}
+                        </div>
+                        """,
                         unsafe_allow_html=True
                     )
 
-                    card_col1, card_col2 = st.columns(
-                        [1, 3]
+
+                    card_col1, card_col2 = (
+                        st.columns(
+                            [1, 3]
+                        )
                     )
+
 
                     with card_col1:
 
@@ -2147,69 +2462,81 @@ if page == "🤖 AI Chatbot":
                                 width=180
                             )
 
+
                     with card_col2:
 
                         st.markdown(
                             f"""
-<div class="chat-movie-card">
+                            <div class="chat-movie-card">
 
-<div class="chat-movie-title">
-🎬 {chat_movie["title"]}
-</div>
+                                <div class="chat-movie-title">
+                                    🎬 {chat_movie["title"]}
+                                </div>
 
-<div class="chat-movie-genres">
-🎭 {chat_movie["genres"]}
-</div>
+                                <div class="chat-movie-genres">
+                                    🎭 {chat_movie["genres"]}
+                                </div>
 
-<div class="chat-movie-stats">
+                                <div class="chat-movie-stats">
 
-<div class="chat-movie-stat">
-<div class="chat-movie-label">
-⭐ Actual Rating
-</div>
-<div class="chat-movie-value">
-{chat_movie["average_rating"]:.2f}
-</div>
-</div>
+                                    <div class="chat-movie-stat">
 
-<div class="chat-movie-stat">
-<div class="chat-movie-label">
-🤖 Predicted
-</div>
-<div class="chat-movie-value">
-{chat_movie["predicted_rating"]:.2f}
-</div>
-</div>
+                                        <div class="chat-movie-label">
+                                            ⭐ Actual Rating
+                                        </div>
 
-<div class="chat-movie-stat">
-<div class="chat-movie-label">
-👥 Ratings
-</div>
-<div class="chat-movie-value">
-{int(chat_movie["rating_count"]):,}
-</div>
-</div>
+                                        <div class="chat-movie-value">
+                                            {chat_movie["average_rating"]:.2f}
+                                        </div>
 
-</div>
+                                    </div>
 
-</div>
-""",
+
+                                    <div class="chat-movie-stat">
+
+                                        <div class="chat-movie-label">
+                                            🤖 Predicted
+                                        </div>
+
+                                        <div class="chat-movie-value">
+                                            {chat_movie["predicted_rating"]:.2f}
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="chat-movie-stat">
+
+                                        <div class="chat-movie-label">
+                                            👥 Ratings
+                                        </div>
+
+                                        <div class="chat-movie-value">
+                                            {int(chat_movie["rating_count"]):,}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            """,
                             unsafe_allow_html=True
                         )
 
 
-            # ------------------------------------------------
-            # SHOW TEXT ANSWER
-            # ------------------------------------------------
+            # ==================================================
+            # TEXT ANSWER
+            # ==================================================
 
             st.write(
                 answer
             )
 
 
-            # ------------------------------------------------
+            # ==================================================
             # GENERATE VOICE
-            # ------------------------------------------------
+            # ==================================================
 
             with st.spinner(
                 "🔊 Generating voice..."
@@ -2222,9 +2549,9 @@ if page == "🤖 AI Chatbot":
                 )
 
 
-            # ------------------------------------------------
+            # ==================================================
             # PLAY AUDIO
-            # ------------------------------------------------
+            # ==================================================
 
             if audio_bytes:
 
@@ -2253,9 +2580,9 @@ if page == "🤖 AI Chatbot":
         )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # CLEAR CONVERSATION
-    # --------------------------------------------------------
+    # ========================================================
 
     if st.button(
         "🔄 Clear Conversation"
@@ -2268,4 +2595,8 @@ if page == "🤖 AI Chatbot":
         st.session_state.last_movie_title = None
 
         st.rerun()
+                  
+
+
+ 
 
