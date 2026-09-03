@@ -1,7 +1,11 @@
 # 🎬 Movie AI Intelligence System
 
 ### AI-Powered Movie Recommendation, Rating Intelligence & Conversational Assistant
+
+[![Live Demo](https://img.shields.io/badge/🌐-Live%20Demo-brightgreen?style=for-the-badge)](https://movie-ai-intelligence-ncpqk38vmsygr7v3vrxdjq.streamlit.app/)
+
 ---
+
 ## 📌 Overview
 
 **Movie AI Intelligence System** is an interactive AI-powered movie analytics and recommendation application built with **Python and Streamlit**.
@@ -22,6 +26,22 @@ The system combines:
 * 📊 Movie analytics and visualization
 
 The application provides a single platform where users can explore movie statistics, compare actual and predicted ratings, discover similar movies, and interact with an AI movie assistant.
+
+---
+
+## 📸 Screenshots
+
+### 📊 Dashboard Overview
+![Dashboard Overview](screenshots/dashboard-overview.png)
+
+### ⭐ Rating Distribution
+![Rating Distribution](screenshots/rating-distribution.png)
+
+### 🎭 Genre Distribution
+![Genre Distribution](screenshots/genre-distribution.png)
+
+### 🏆 Top Rated Movies
+![Top Rated Movies](screenshots/top-rated-movies.png)
 
 ---
 
@@ -252,19 +272,19 @@ For example:
 User:
 Tell me about Forrest Gump.
 
-Assistant:
+A:
 [Forrest Gump information]
 
 User:
 What is its rating?
 
-Assistant:
+A:
 The rating is ...
 
 User:
 Would you recommend it?
 
-Assistant:
+A:
 Based on its available rating information...
 ```
 
@@ -500,6 +520,12 @@ movie-ai-intelligence/
 ├── movie_rating_model.pkl
 ├── feature_columns.pkl
 │
+├── screenshots/
+│   ├── dashboard-overview.png
+│   ├── rating-distribution.png
+│   ├── genre-distribution.png
+│   └── top-rated-movies.png
+│
 ├── .gitignore
 │
 └── README.md
@@ -508,7 +534,7 @@ movie-ai-intelligence/
 ### File Description
 
 | File                     | Purpose                                        |
-| ------------------------ | ---------------------------------------------- |
+| ------------------------ | ----------------------------------------------- |
 | `app.py`                 | Main Streamlit application                     |
 | `movie_data.pkl`         | Processed movie dataset and movie intelligence |
 | `movie_documents.pkl`    | Movie documents used for retrieval             |
@@ -516,6 +542,7 @@ movie-ai-intelligence/
 | `movie_rating_model.pkl` | Trained Random Forest rating model             |
 | `feature_columns.pkl`    | ML feature column information                  |
 | `requirements.txt`       | Python dependencies                            |
+| `screenshots/`           | Dashboard screenshots used in this README      |
 | `.gitignore`             | Files excluded from Git                        |
 
 > The application currently requires all five model/data artifacts above to start successfully.
@@ -728,7 +755,7 @@ Large model/data files may require Git LFS or another external storage strategy 
 The Streamlit application currently contains five main pages:
 
 | Page                  | Purpose                               |
-| --------------------- | ------------------------------------- |
+| ---------------------- | -------------------------------------- |
 | 📊 Dashboard          | Movie analytics and visualizations    |
 | 🔎 Movie Intelligence | Detailed movie-level analysis         |
 | ⭐ Rating Predictions  | ML rating predictions and filtering   |
@@ -870,13 +897,3 @@ If you find this project useful or interesting, consider giving the repository a
 
 **Movie AI Intelligence System**
 *Recommendation • Rating Intelligence • Semantic Search • RAG • Conversational AI*
-
----
-
-
-
-
-
-
-
-
