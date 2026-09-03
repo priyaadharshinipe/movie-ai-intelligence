@@ -1938,7 +1938,6 @@ if page == "🤖 AI Chatbot":
         st.session_state.last_movie_title = None
 
         st.rerun()
-```
 
 
 
